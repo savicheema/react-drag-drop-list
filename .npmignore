@@ -2,6 +2,7 @@
 /tests
 /.husky
 /.parcel-cache
+/.github
 /src
 commitlint.config.ts
 vitest.config.ts
