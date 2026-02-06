@@ -1,6 +1,6 @@
 {
   "name": "react-drag-drop-list",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "react drag drop list",
   "keywords": [
     "drag",
@@ -28,6 +28,7 @@
     "@types/react": "^19.2.13",
     "@vitest/browser": "^4.0.18",
     "@vitest/browser-playwright": "^4.0.18",
+    "husky": "^9.1.7",
     "parcel": "^2.16.4",
     "playwright": "^1.58.2",
     "rimraf": "^6.1.2",
