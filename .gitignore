@@ -140,3 +140,5 @@ vite.config.ts.timestamp-*
 
 #tests
 /tests/__screenshots__
+
+/examples
