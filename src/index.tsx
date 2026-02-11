@@ -19,7 +19,7 @@ const DragDropItem = ({
   debug,
   itemComponent: ItemComponent,
 }: {
-  val: number | undefined;
+  val: { id: number };
   index: number;
   debug?: boolean;
   itemComponent: JSXElementConstructor<any>;
@@ -134,17 +134,43 @@ const DragDropItem = ({
   );
 };
 
-export const DragDropListList = ({
+const areTwoArraysEqual = (
+  a: { val: { id: number }; index: number }[],
+  b: { val: { id: number }; index: number }[],
+) => {
+  if (!a?.length && a?.length !== 0)
+    throw Error("Provided value for comparison is not an Array");
+  if (!b?.length && b?.length !== 0)
+    throw Error("Provided value for comparison is not an Array");
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].val.id !== b[i].val.id) return false;
+  }
+
+  return true;
+};
+
+export const DragDropList = ({
   list,
   debug,
   itemComponent,
+  onDragEnd,
 }: {
-  list: Array<{ val?: number; index: number }>;
+  list: Array<{ val: { id: number }; index: number }>;
   debug?: boolean;
   itemComponent: JSXElementConstructor<any>;
+  onDragEnd?: Function;
 }) => {
+  if (!list?.length) throw Error("Missing list");
+
+  list.forEach((item) => {
+    if (!item.val.id) throw Error(`Missing Id for item val ${item}`);
+  });
+
   const [draggedOverIndex, setDraggedOverIndex] = useState(0);
-  const [itemsList, setItemsList] = useState(list || []);
+  const [itemsList, setItemsList] =
+    useState<{ val: { id: number }; index: number }[]>(list);
   const [draggedIndex, setDraggedIndex] = useState(0);
 
   const dragTargetRef = React.useRef<HTMLDivElement>(null);
@@ -152,6 +178,7 @@ export const DragDropListList = ({
   function updateList() {
     console.log("what 2");
 
+    // @ts-ignore
     setItemsList((list) => {
       if (draggedIndex === draggedOverIndex) return list;
       const draggedItem = list.find((value) => value.index === draggedIndex);
@@ -215,6 +242,28 @@ export const DragDropListList = ({
     };
   });
 
+  React.useEffect(() => {
+    setItemsList(list);
+  }, [list]);
+
+  React.useEffect(() => {
+    if (!onDragEnd) return;
+    if (
+      areTwoArraysEqual(
+        [...list].sort((a, b) => {
+          return a.index - b.index;
+        }),
+        [...itemsList].sort((a, b) => {
+          return a.index - b.index;
+        }),
+      )
+    ) {
+      return;
+    }
+
+    onDragEnd?.(itemsList);
+  }, [itemsList]);
+
   return (
     <DragDropContext.Provider
       value={{
@@ -248,15 +297,17 @@ export const DragDropListList = ({
         </div>
       )}
       <div ref={dragTargetRef} className="list-container">
-        {[...itemsList].map(({ val, index }) => (
-          <DragDropItem
-            val={val}
-            key={index}
-            index={index}
-            debug={debug}
-            itemComponent={itemComponent}
-          />
-        ))}
+        {[...itemsList]
+          .sort((a, b) => a.index - b.index)
+          .map(({ val, index }) => (
+            <DragDropItem
+              val={val}
+              key={val.id}
+              index={index}
+              debug={debug}
+              itemComponent={itemComponent}
+            />
+          ))}
       </div>
     </DragDropContext.Provider>
   );
